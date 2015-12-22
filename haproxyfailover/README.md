@@ -1,6 +1,6 @@
-# opsworks-haproxy cookbook
+# opsworks-haproxyfailover cookbook
 
-Cookbook to install and configure HAProxy load balancer on AWS OpsWorks. Enhanced with failover capability according to the excellent article:
+Cookbook to install and configure HAProxy failover on AWS OpsWorks, based on the excellent article:
 
 http://hipsterdevblog.com/blog/2015/01/23/automated-haproxy-failover-on-opsworks/
 
@@ -8,9 +8,11 @@ http://hipsterdevblog.com/blog/2015/01/23/automated-haproxy-failover-on-opsworks
 
 Supports Amazon linux on AWS OpsWorks with Chef 11.4 or 11.10.
 
+As you have a haproxy layer already, you can use the haproxyfailover script to just extend/change the failover stuff.
+
 # Usage
 
-Include setup.rb recipe during setup and the configure recipe in the configure event.
+Include the default recipe during setup and the configure recipe in the configure event.
 
 # Attributes
 
@@ -30,11 +32,9 @@ Include setup.rb recipe during setup and the configure recipe in the configure e
 
 # Recipes
 
-* `default` - install and create haproxy.cfg
-* `configure` - update haproxy.cfg
-* `service` - Chef service definition
+* `setup` - install and create the failover with monit notifications
+
 
 # Author
 
-* Author:: Mark Altmann (<mark.altmann@moovel.com>)
-
+* Author: Mark Altmann (<mark.altmann@moovel.com>)
