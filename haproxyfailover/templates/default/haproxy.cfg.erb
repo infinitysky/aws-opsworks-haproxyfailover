@@ -8,9 +8,6 @@ global
   user haproxy
   group haproxy
   stats socket /tmp/haproxy.sock
-<% @custom_config[:global].each do |name, value| %>
-  <%= "#{name} #{value}" unless value.nil? %>
-<% end %>
 
 defaults
   log             global
@@ -32,9 +29,6 @@ defaults
   stats auth <%= node[:haproxy][:stats_user] %>:<%= node[:haproxy][:stats_password] %>
   stats uri <%= node[:haproxy][:stats_url] %>
 <% end -%>
-#<% @custom_config[:defaults].each do |name, value| %>
-#  <%= "#{name} #{value}" unless value.nil? %>
-#<% end %>
 
 <% unless @backends.empty? -%>
 backend app_servers
@@ -74,19 +68,3 @@ backend app_servers_ssl
 frontend http-in
   bind :80
   redirect location https://www.moovel.com:443
-#<% @custom_config[:frontend].each do |name, value| %>
-#  <%= "#{name} #{value}" unless value.nil? %>
-#<% end %>
-#<% unless @backends.empty? -%>
-#  default_backend app_servers
-#<% end -%>
-
-#frontend https-in
-#  mode tcp
-#  bind :443
-#<% @custom_config[:frontend_ssl].each do |name, value| %>
-#  <%= "#{name} #{value}" unless value.nil? %>
-#<% end %>
-#<% unless @backends.empty? -%>
-#  default_backend app_servers_ssl
-#<% end -%>
