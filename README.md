@@ -32,11 +32,9 @@ Include the default recipe during setup and the configure recipe in the configur
 
 # Recipes
 
-* `default` - install and create haproxy.cfg
-* `configure` - update haproxy.cfg
-* `service` - Chef service definition
-* `stop` - stop service
+* `setup` - install and create the failover with monit notifications
+
 
 # Author
 
-* Author:: Mark Altmann (<mark.altmann@moovel.com>)
+* Author: Mark Altmann (<mark.altmann@moovel.com>)
