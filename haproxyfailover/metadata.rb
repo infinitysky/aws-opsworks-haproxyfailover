@@ -1,4 +1,4 @@
-name             'haproxy'
+name             'haproxyfailover'
 maintainer       'moovel'
 maintainer_email 'mark.altmann@moovel.com'
 license          'MIT'
