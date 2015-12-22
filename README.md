@@ -7,7 +7,6 @@ http://hipsterdevblog.com/blog/2015/01/23/automated-haproxy-failover-on-opsworks
 # Requirements
 
 Supports Amazon linux on AWS OpsWorks with Chef 11.4 or 11.10.
-Support for Chef 12 is planned. See the #branch:chef-12
 
 As you have a haproxy layer already, you can use the haproxyfailover script to just extend/change the failover stuff.
 
