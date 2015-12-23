@@ -1,70 +1,54 @@
+#---------------------------------------------------------------------
+# Example configuration for a possible web application.  See the
+# full configuration options online.
+#
+#   http://haproxy.1wt.eu/download/1.4/doc/configuration.txt
+#
+#---------------------------------------------------------------------
+
+#---------------------------------------------------------------------
+# Global settings
+#---------------------------------------------------------------------
 global
-  log 127.0.0.1   local0
-  log 127.0.0.1   local1 notice
-  #log loghost    local0 info
-  maxconn <%= node[:haproxy][:global_max_connections] %>
-  #debug
-  #quiet
-  user haproxy
-  group haproxy
-  stats socket /tmp/haproxy.sock
+    log         127.0.0.1 local2
 
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon
+
+    # turn on stats unix socket
+    stats socket /var/lib/haproxy/stats
+
+#---------------------------------------------------------------------
+# common defaults that all the 'listen' and 'backend' sections will
+# use if not designated in their block
+#---------------------------------------------------------------------
 defaults
-  log             global
-  mode            http
-  option          httplog
-  option          dontlognull
-  retries         <%= node[:haproxy][:retries] %>
-  option          redispatch
-  maxconn        <%= node[:haproxy][:default_max_connections] %>
-  timeout client <%= node[:haproxy][:client_timeout] %>             # Client and server timeout must match the longest
-  timeout server <%= node[:haproxy][:server_timeout] %>             # time we may wait for a response from the server.
-  timeout queue  <%= node[:haproxy][:queue_timeout] %>              # Don't queue requests too long if saturated.
-  timeout connect <%= node[:haproxy][:connect_timeout] %>           # There's no reason to change this one.
-  timeout http-request <%= node[:haproxy][:http_request_timeout] %>	# A complete request may never take that long.
-  option          httpclose                                         # disable keepalive (HAProxy does not yet support the HTTP keep-alive mode)
-  option          abortonclose                                      # enable early dropping of aborted requests from pending queue
-  option          httpchk                                           # enable HTTP protocol to check on servers health
-<% if node[:haproxy][:enable_stats] -%>
-  stats auth <%= node[:haproxy][:stats_user] %>:<%= node[:haproxy][:stats_password] %>
-  stats uri <%= node[:haproxy][:stats_url] %>
-<% end -%>
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option http-server-close
+    option forwardfor       except 127.0.0.0/8
+    option                  redispatch
+    retries                 3
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 3000
 
-<% unless @backends.empty? -%>
-backend app_servers
-  balance <%= node[:haproxy][:balance] %>
-  option redispatch
-  option httpclose
-  option forwardfor
-  option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
+#---------------------------------------------------------------------
+# main frontend which proxys to the backends
+#---------------------------------------------------------------------
+frontend  http-in
+        bind *:80
+        redirect location https://www.moovel.com:443
 
-  <% @custom_config[:backend].each do |name, value| %>
-  <%= "#{name} #{value}" unless value.nil? %>
-  <% end %>
-
-  default-server <%= OpsworksHaproxy::default_server_params(node) %>
-  <% @backends.each do |name, attrs| -%>
-  server <%= "#{name} #{attrs['private_ip']}:#{node[:haproxy][:backend_port]} check weight #{attrs[:weight]}" %>
-  <% end -%>
-<% end -%>
-
-<% unless @backends.empty? -%>
-backend app_servers_ssl
-  mode tcp
-  balance <%= node[:haproxy][:balance] %>
-  option redispatch
-  option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
-
-  <% @custom_config[:backend_ssl].each do |name, value| %>
-  <%= "#{name} #{value}" unless value.nil? %>
-  <% end %>
-
-  default-server <%= OpsworksHaproxy::default_server_params(node) %>
-  <% @backends.each do |name, attrs| -%>
-  server <%= "#{name} #{attrs['private_ip']}:#{node[:haproxy][:backend_ssl_port]} check weight #{attrs[:weight]}" %>
-  <% end -%>
-<% end -%>
-
-frontend http-in
-  bind :80
-  redirect location https://www.moovel.com:443
+(END)
